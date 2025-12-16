@@ -66,19 +66,64 @@ final List<CategoryModel> categories = [
 ];
 
 // ----- MAIN PAGE -----
-class MountsApp extends StatelessWidget {
+class MountsApp extends StatefulWidget {
+  @override
+  State<MountsApp> createState() => _MountsAppState();
+}
+
+class _MountsAppState extends State<MountsApp> {
+  int selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+
+      // ✅ DRAWER → GARIS 3 MUNCUL
+      drawer: Drawer(
+        child: Column(
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(color: mainColor),
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: Text(
+                  'RendiTriyadi',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.home),
+              title: Text('Home'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: Icon(Icons.favorite_border),
+              title: Text('Favorite'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Profile'),
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      ),
+
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        title: Center(
-          child: Icon(Icons.terrain, color: mainColor, size: 40),
-        ),
         iconTheme: IconThemeData(color: mainColor),
+        centerTitle: true,
+        title: Icon(Icons.terrain, color: mainColor, size: 40),
       ),
+
       body: SafeArea(
         child: Column(
           children: [
@@ -95,7 +140,14 @@ class MountsApp extends StatelessWidget {
                 ),
               ),
             ),
-            AppBottomBar(),
+            AppBottomBar(
+              selectedIndex: selectedIndex,
+              onTap: (index) {
+                setState(() {
+                  selectedIndex = index;
+                });
+              },
+            ),
           ],
         ),
       ),
@@ -188,7 +240,7 @@ class AppSearch extends StatelessWidget {
   }
 }
 
-// ----- MOUNT LIST (CLICKABLE) -----
+// ----- MOUNT LIST -----
 class AppMountListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -203,9 +255,7 @@ class AppMountListView extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => DetailsPage(mount),
-              ),
+              MaterialPageRoute(builder: (_) => DetailsPage(mount)),
             );
           },
           child: Container(
@@ -230,10 +280,7 @@ class AppMountListView extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Text(
-                  mount.location,
-                  style: TextStyle(color: Colors.white),
-                ),
+                Text(mount.location, style: TextStyle(color: Colors.white)),
               ],
             ),
           ),
@@ -300,26 +347,37 @@ class AppCategoryList extends StatelessWidget {
   }
 }
 
-// ----- BOTTOM BAR -----
+// ----- BOTTOM BAR (CLICKABLE) -----
 class AppBottomBar extends StatelessWidget {
+  final int selectedIndex;
+  final Function(int) onTap;
+
+  AppBottomBar({required this.selectedIndex, required this.onTap});
+
+  final List<IconData> icons = [
+    Icons.home,
+    Icons.explore,
+    Icons.turned_in_not,
+    Icons.person_outline,
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 10),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Icon(Icons.home, color: mainColor),
-          Icon(Icons.explore, color: Colors.grey),
-          Icon(Icons.turned_in_not, color: Colors.grey),
-          Icon(Icons.person_outline, color: Colors.grey),
-        ],
+        children: List.generate(icons.length, (index) {
+          final isActive = selectedIndex == index;
+          return IconButton(
+            icon: Icon(icons[index], color: isActive ? mainColor : Colors.grey),
+            onPressed: () => onTap(index),
+          );
+        }),
       ),
     );
   }
